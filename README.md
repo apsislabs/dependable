@@ -1,6 +1,7 @@
 # Dependable
 
 [![Build Status](https://travis-ci.org/apsislabs/dependable.svg?branch=master)](https://travis-ci.org/apsislabs/dependable)
+[![Coverage Status](https://coveralls.io/repos/github/apsislabs/dependable/badge.svg?branch=master)](https://coveralls.io/github/apsislabs/dependable?branch=master)
 
 Dependable is a small gem for tracking dependency relationships
 
