@@ -1,5 +1,7 @@
 # Dependable
 
+[![Build Status](https://travis-ci.org/apsislabs/dependable.svg?branch=master)](https://travis-ci.org/apsislabs/dependable)
+
 Dependable is a small gem for tracking dependency relationships
 
 ## Installation
