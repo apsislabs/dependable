@@ -1,8 +1,33 @@
+# Slayer Services are objects that should implement re-usable pieces of
+# application logic or common tasks. To prevent circular dependencies Services
+# are required to declare which other Service classes they depend on. If a
+# circular dependency is detected an error is raised.
+#
+# In order to enforce the lack of circular dependencies, Service objects can
+# only call other Services that are declared in their dependencies.
+#
+# @example Including Dependable on a base class
+#   class Service
+#     include Dependable
+#     ...
+#   end
+#
+#   class NetworkService < Service
+#     ...
+#   end
+#
+#   class StripeService < Service
+#     dependencies NetworkService
+#     ...
+#   end
+#
 module Dependable
   def self.included(klass)
     klass.extend ClassMethods
   end
 
+  # Everything in Dependable::ClassMethods automatically get extended onto the
+  # class that includes Dependable.
   module ClassMethods
     attr_reader :deps
 
@@ -100,7 +125,7 @@ module Dependable
     end
 
     # Dependency enforcement method hooks
-    def hook_before_method(name)
+    def hook_before_method(*)
       @deps ||= []
       @@allowed_services ||= nil
 
@@ -111,7 +136,7 @@ module Dependable
       @@allowed_services << (@deps + [self])
     end
 
-    def hook_after_method(name)
+    def hook_after_method(*)
       @@allowed_services.pop
       @@allowed_services = nil if @@allowed_services.empty?
     end

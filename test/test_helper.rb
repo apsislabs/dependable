@@ -20,16 +20,16 @@ require 'minitest/reporters'
 
 Minitest::Reporters.use! Minitest::Reporters::SpecReporter.new
 
-def s(name, service_block = nil)
-  create_service(name: name, &service_block)
+def s(name, service_block = nil, parent: Object)
+  create_service(name: name, parent: parent, &service_block)
 
   yield
 
-  cleanup_service({ name: name })
+  cleanup_service(name: name)
 end
 
-def create_service(name: nil, &block)
-  return Class.new(&block).tap do |service|
+def create_service(name: nil, parent: Object, &block)
+  Class.new(parent, &block).tap do |service|
     Object.const_set(name, service) if name
   end
 end

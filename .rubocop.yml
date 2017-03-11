@@ -3,4 +3,5 @@ AllCops:
       - '*.gemspec'
       - 'tmp/**/*'
       - 'bin/**/*'
+      - 'test/**/*'
       - '**/version.rb'

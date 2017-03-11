@@ -42,6 +42,12 @@ class DependableTest < Minitest::Test
     end
   end
 
+  def test_subclasses_are_also_dependable
+    s(:AService, proc { include Dependable }) do
+      assert Class.new(AService).respond_to?(:dependencies)
+    end
+  end
+
   # Transitive dependency calculation
   def test_raises_error_for_circular_dependencies
     s(:FirstService, proc { include Dependable }) do
@@ -75,10 +81,28 @@ class DependableTest < Minitest::Test
     end
   end
 
+  def test_ok_for_instance_calls_from_outside_dependable_inherited
+    s(:DependableService, proc { include Dependable; }) do
+      s(:AService, proc { def return_3; 3; end }, parent: DependableService) do
+        assert_equal AService.new.return_3, 3, 'AService instance should directly produce the result of 3'
+      end
+    end
+  end
+
   def test_ok_for_isntance_calls_from_inside_declared_dependency
     s(:AService, proc { include Dependable; def self.return_3; 3; end }) do
       s(:BService, proc { include Dependable; dependencies AService; def return_8; AService.return_3 + 5; end }) do
         assert_equal 8, BService.new.return_8
+      end
+    end
+  end
+
+  def test_ok_for_isntance_calls_from_inside_declared_dependency_inherited
+    s(:DependableService, proc { include Dependable; }) do
+      s(:AService, proc { def self.return_3; 3; end }, parent: DependableService) do
+        s(:BService, proc { dependencies AService; def return_8; AService.return_3 + 5; end }, parent: DependableService) do
+          assert_equal 8, BService.new.return_8
+        end
       end
     end
   end
@@ -88,6 +112,18 @@ class DependableTest < Minitest::Test
       s(:BService, proc { include Dependable; def return_6; AService.return_3 + 3; end }) do
         assert_raises Dependable::DependencyError do
           BService.new.return_6
+        end
+      end
+    end
+  end
+
+  def test_raises_for_call_to_dependable_not_in_dependencies_inherited
+    s(:DependableService, proc { include Dependable; }) do
+      s(:AService, proc { def self.return_3; 3; end }, parent: DependableService) do
+        s(:BService, proc { def return_6; AService.return_3 + 3; end }, parent: DependableService) do
+          assert_raises Dependable::DependencyError do
+            BService.new.return_6
+          end
         end
       end
     end
