@@ -1,8 +1,6 @@
 # Dependable
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/dependable`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+Dependable is a small gem for tracking dependency relationships
 
 ## Installation
 
@@ -22,7 +20,45 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Simply include Dependable on any class that you want to enforce dependency constraints on.
+
+```ruby
+class MyService
+    include Dependable
+
+    # do lots of cool stuff.
+end
+```
+
+A class that is Dependable, can only call another Dependable class if it explicitly lists the other class in its dependencies.
+
+```ruby
+class NetworkService < MyService  # NetworkService is now Dependable, as it inherits from MyService, which is Dependable
+    def self.get(url)
+        # omitted
+    end
+end
+
+class StripeService < MyService # BAD
+    def self.get_customer
+        ...
+        NetworkService.get(url) # this will explode, because we didn't list our dependency explicitly
+    end
+end
+
+class StripeService < MyService # GOOD
+    dependencies NetworkService
+
+    def self.get_customer
+        ...
+        NetworkService.get(url) # this will run as expected
+    end
+end
+```
+
+## Remaining Work
+
+Currently dependable is only tracks dependency relations between classes. Future work may include tracking dependency relationships between object instances.
 
 ## Development
 
@@ -32,10 +68,8 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/Noah Callaway/dependable. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
-
+Bug reports and pull requests are welcome on GitHub at https://github.com/apsislabs/dependable. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
-
