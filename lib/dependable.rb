@@ -1,5 +1,3 @@
-require "dependable/version"
+require 'dependable/version'
 
-module Dependable
-  # Your code goes here...
-end
+require 'dependable/dependable'

@@ -1,0 +1,3 @@
+module Dependable
+  # Your code goes here...
+end

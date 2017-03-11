@@ -1,0 +1,6 @@
+AllCops:
+   Exclude:
+      - '*.gemspec'
+      - 'tmp/**/*'
+      - 'bin/**/*'
+      - '**/version.rb'
