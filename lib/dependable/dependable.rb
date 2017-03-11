@@ -1,10 +1,7 @@
-# Slayer Services are objects that should implement re-usable pieces of
-# application logic or common tasks. To prevent circular dependencies Services
-# are required to declare which other Service classes they depend on. If a
-# circular dependency is detected an error is raised.
-#
-# In order to enforce the lack of circular dependencies, Service objects can
-# only call other Services that are declared in their dependencies.
+# Dependable objects are objects that may only call other Dependable objects if
+# they declare ane explicit dependency. The main aim is to prevent circular dependencies
+# in various layers of an application. If a circular dependency is detected, an
+# error is raised.
 #
 # @example Including Dependable on a base class
 #   class Service
@@ -65,20 +62,26 @@ module Dependable
     #
     # @return [Array<Class>] The transitive closure of dependencies for this object.
     def dependencies(*deps)
-      raise(DependencyError, "There were multiple \`dependencies\` definitions for #{self}.") if @deps
+      if @deps
+        raise(DependencyError,
+              "There were multiple \`dependencies\` definitions for #{self}.")
+      end
 
       deps.each do |dep|
         unless dep.is_a?(Class)
-          raise(DependencyError, "The dependency \`#{dep}\` (for #{self}) was not a \`Class\` (was \`#{dep.class}\`).")
+          raise(DependencyError,
+                "The dependency \`#{dep}\` (for #{self}) was not a \`Class\` (was \`#{dep.class}\`).")
         end
 
         unless dep.ancestors.include?(Dependable)
-          raise(DependencyError, "The dependency \`#{dep}\` (for #{self}) did not include \`Dependable\`.")
+          raise(DependencyError,
+                "The dependency \`#{dep}\` (for #{self}) did not include \`Dependable\`.")
         end
       end
 
       unless deps.uniq.length == deps.length
-        raise(DependencyError, "There were duplicate \`dependencies\` definitions for #{self}.")
+        raise(DependencyError,
+              "There were duplicate \`dependencies\` definitions for #{self}.")
       end
 
       @deps = deps
@@ -101,7 +104,6 @@ module Dependable
 
       # Add each of our dependencies (and it's transitive dependency chain) to our
       # own dependencies.
-
       @deps.each do |dep|
         dependency_hash[self] << dep
 
@@ -145,8 +147,9 @@ module Dependable
       if @@allowed_services
         allowed = @@allowed_services.last
 
-        if !(allowed && allowed.include?(self))
-          raise(DependencyError, "Attempted to call #{self} from another \`#{Dependable}\` which did not declare it as a dependency.")
+        unless allowed && allowed.include?(self)
+          raise(DependencyError,
+                "Attempted to call #{self} from another \`#{Dependable}\` which did not declare it as a dependency.")
         end
       end
     end
@@ -154,20 +157,16 @@ module Dependable
     # Method hook infrastructure
     def singleton_method_added(name)
       insert_hooks_for(name,
-      define_method_fn: :define_singleton_method,
-      hook_target: self,
-      # before_hook: hook_before_method,
-      # after_hook: hook_after_method,
-      alias_target: singleton_class)
+                       define_method_fn: :define_singleton_method,
+                       hook_target: self,
+                       alias_target: singleton_class)
     end
 
     def method_added(name)
       insert_hooks_for(name,
-      define_method_fn: :define_method,
-      hook_target: self,
-      # before_hook: self.class.hook_before_method,
-      # after_hook: self.class.hook_after_method,
-      alias_target: self)
+                       define_method_fn: :define_method,
+                       hook_target: self,
+                       alias_target: self)
     end
 
     def insert_hooks_for(name, define_method_fn:, hook_target:, alias_target:)

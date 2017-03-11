@@ -5,3 +5,33 @@ AllCops:
       - 'bin/**/*'
       - 'test/**/*'
       - '**/version.rb'
+
+Style/RedundantSelf:
+  Enabled: false
+
+Style/RedundantReturn:
+  Enabled: false
+
+Style/GuardClause:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+Style/EmptyLinesAroundClassBody:
+  Enabled: false
+
+Style/CommentIndentation:
+  Enabled: false
+
+Style/ClassVars:
+  Enabled: false
+
+Metrics/LineLength:
+  Max: 120
+
+Metrics/MethodLength:
+  Max: 25
+
+Metrics/AbcSize:
+  Max: 25
